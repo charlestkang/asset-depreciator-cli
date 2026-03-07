@@ -1,7 +1,8 @@
-#Depreciator v2 for CS50
+# Asset Depreciation CLI
 
-##Project: Simple depreciation schedule calculator for straight line, double declining
-balance, and sum of years digits methods
+A command-line tool for tracking assets and calculating depreciation schedules using multiple accounting methods.
+
+Built as a final project for Harvard's CS50P course.
 
 ### Usage: 
  - This is a CLI script running in the terminal, simply type "python project.py" to get
