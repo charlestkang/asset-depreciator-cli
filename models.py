@@ -3,8 +3,13 @@ Models for the depreciator app.
 Defines the Asset class and related domain logic.
 """
 
+from datetime import date
+
 
 class Asset:
+
+    FIELDS = ["id_", "name", "cost", "salvage", "life_years", "method", "date_"]
+
     def __init__(
         self,
         id_: int,
@@ -13,6 +18,7 @@ class Asset:
         salvage: float,
         life_years: int,
         method: str,
+        date_: date,
     ):
         if cost < 0:
             raise ValueError("Cost cannot be negative")
@@ -27,15 +33,17 @@ class Asset:
         self.salvage = salvage
         self.life_years = life_years
         self.method = method
+        self.date_ = date_
 
     def __str__(self):
         return (
-            f"id_: {self.id_}, "
+            f"id: {self.id_}, "
             f"name: {self.name}, "
             f"cost: {self.cost}, "
             f"salvage: {self.salvage}, "
             f"life years: {self.life_years}, "
-            f"method: {self.method} "
+            f"method: {self.method}, "
+            f"date placed in service: {self.date_} "
         )
 
     def __eq__(self, other):
@@ -48,6 +56,7 @@ class Asset:
             and self.salvage == other.salvage
             and self.life_years == other.life_years
             and self.method == other.method
+            and self.date_ == other.date_
         )
 
     def to_dict(self):
@@ -58,4 +67,5 @@ class Asset:
             "salvage": self.salvage,
             "life_years": self.life_years,
             "method": self.method,
+            "date_": self.date_,
         }

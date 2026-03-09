@@ -4,24 +4,29 @@ Handles all input/output for the app
 """
 
 from models import Asset
+import calculator
 
 ID_WIDTH = 5
-NAME_WIDTH = 40
-COST_WIDTH = 10
-SALVAGE_WIDTH = 10
+NAME_WIDTH = 20
+COST_WIDTH = 8
+SALVAGE_WIDTH = 8
 LIFE_YEARS_WIDTH = 5
-METHOD_WIDTH = 5
-YEAR_WIDTH = 6
+METHOD_WIDTH = 7
+YEAR_WIDTH = 5
 DEPRECIATION_WIDTH = 20
-
+DATE_WIDTH = 11
+ACCUMULATED_WIDTH = 20
+CHART_WIDTH = 20
+PROGRESS_BAR_LENGTH = 45
 
 def hello() -> None:
-    print("\nWelcome to the Depreciator app!")
+    print("\nWelcome to the Depreciator app!\n")
 
 
 def display_asset(asset: Asset) -> None:
     if not asset:
         print("\nNo asset found")
+        return
     name = asset.name
     if len(name) >= NAME_WIDTH:
         name = name[: NAME_WIDTH - 3] + "..."
@@ -32,19 +37,20 @@ def display_asset(asset: Asset) -> None:
         f"{asset.salvage:>{SALVAGE_WIDTH}} "
         f"{asset.life_years:>{LIFE_YEARS_WIDTH}} "
         f"{asset.method:>{METHOD_WIDTH}} "
+        f"{str(asset.date_):>{DATE_WIDTH}} "
     )
 
 
 def display_assets(assets: list[Asset]) -> None:
-    if assets == []:
+    if not assets:
         print("\nNo assets to display")
         return None
-    print_header()
+    print_view_header()
     for asset in assets:
         display_asset(asset)
 
 
-def print_header() -> None:
+def print_view_header() -> None:
     print()
     print(
         f"{'ID':<{ID_WIDTH}} "
@@ -52,7 +58,8 @@ def print_header() -> None:
         f"{'COST':>{COST_WIDTH}} "
         f"{'SALVAGE':>{SALVAGE_WIDTH}} "
         f"{'LIFE':>{LIFE_YEARS_WIDTH}} "
-        f"{'METHOD':<{METHOD_WIDTH}} "
+        f"{'METHOD':>{METHOD_WIDTH}} "
+        f"{'DATE (YMD)':>{DATE_WIDTH}} "
     )
     print(
         f"{'-'*ID_WIDTH} "
@@ -61,16 +68,38 @@ def print_header() -> None:
         f"{'-'*SALVAGE_WIDTH} "
         f"{'-'*LIFE_YEARS_WIDTH} "
         f"{'-'*METHOD_WIDTH} "
+        f"{'-'*DATE_WIDTH} "
     )
 
 
 def print_depreciation_header(asset: Asset) -> None:
-    print(f"\nID: {asset.id_}, Name: {asset.name}\n")
-    print(f"{'YEAR':<{YEAR_WIDTH}} " f"{'Depreciation':>{DEPRECIATION_WIDTH}} ")
-    print(f"{'-'*YEAR_WIDTH} " f"{'-'*DEPRECIATION_WIDTH} ")
+    print(f"\nID: {asset.id_}, Name: {asset.name} ")
+
+    progress = (calculator.percent_depreciated(asset))
+    bar = int(progress * PROGRESS_BAR_LENGTH)
+    percent = f"{progress * 100:.2f}%"
+    print()
+    print("Progress: ", "█" * bar, "░" * (PROGRESS_BAR_LENGTH - bar), " ", percent, sep="")
+    print()
+    print(
+        f"{'YEAR':<{YEAR_WIDTH}} "
+        f"{'Depreciation':>{DEPRECIATION_WIDTH}} "
+        f"{'Accumulated':>{ACCUMULATED_WIDTH}} "
+        f"{'Depreciated':>{CHART_WIDTH}} "
+    )
+    print(
+        f"{'-'*YEAR_WIDTH} "
+        f"{'-'*DEPRECIATION_WIDTH} "
+        f"{'-'*ACCUMULATED_WIDTH} "
+        f"{'-'*CHART_WIDTH}"
+    )
 
 
-def inspect(asset: Asset, schedule: list[tuple[int, float]]) -> None:
+def inspect(asset: Asset, schedule: list[tuple[int, float, float]]) -> None:
     print_depreciation_header(asset)
-    for year, depreciation in schedule:
-        print(f"{year:<{YEAR_WIDTH}}|{depreciation:>{DEPRECIATION_WIDTH}.2f} ")
+    total_accum = schedule[-1][2]
+    for year, depreciation, accumulated in schedule:
+        chart_mult = int(CHART_WIDTH * (accumulated / total_accum))
+        print(
+            f"{year:<{YEAR_WIDTH}}|{depreciation:>{DEPRECIATION_WIDTH}.2f}|{accumulated:>{ACCUMULATED_WIDTH}.2F}|{'█'*chart_mult}"
+        )

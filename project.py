@@ -3,6 +3,7 @@ Main CLI entry point for the depreciator app.
 Handles user interaction and coordinates modules.
 """
 
+from datetime import date
 import string
 
 import calculator
@@ -14,14 +15,14 @@ import storage
 
 
 OPTIONS = ["add", "view", "remove all", "exit"]
-FIELD_NAMES = ["id", "name", "cost", "salvage", "life", "method"]
+FIELD_NAMES = ["id", "name", "cost", "salvage", "life", "method", "date"]
 
 
-def hello_user():
+def hello_user() -> None:
     display.hello()
 
 
-def add_asset():
+def add_asset() -> Asset:
     while True:
         try:
             id_ = storage.get_next_id()
@@ -29,8 +30,9 @@ def add_asset():
             cost = get_float("Item cost: ")
             salvage = get_float_optional("Salvage value (default 0): ")
             life_years = get_int("Item lifetime in whole number years: ")
-            method = get_method()
-            new_asset = build_asset(id_, name, cost, salvage, life_years, method)
+            method = get_method("Depreciation method: ")
+            date_ = get_date("Date put in service (YYYY-MM-DD): ")
+            new_asset = build_asset(id_, name, cost, salvage, life_years, method, date_)
             print("\nItem added")
             return new_asset
         except ValueError as e:
@@ -39,12 +41,18 @@ def add_asset():
 
 
 def build_asset(
-    id_: int, name: str, cost: float, salvage: float, life_years: int, method: str
+    id_: int,
+    name: str,
+    cost: float,
+    salvage: float,
+    life_years: int,
+    method: str,
+    date_: date,
 ) -> Asset:
-    return Asset(id_, name, cost, salvage, life_years, method)
+    return Asset(id_, name, cost, salvage, life_years, method, date_)
 
 
-def normalize_method(method):
+def normalize_method(method) -> str:
     if method in ("straight line", "sl"):
         return "sl"
     elif method in ("double declining balance", "ddb"):
@@ -55,13 +63,28 @@ def normalize_method(method):
 
 def get_intention() -> str:
     while True:
-        print(f"\n{" | ".join(OPTIONS)}")
+        print(f"{" | ".join(OPTIONS)}")
         s = input(">").strip().lower()
         if s in OPTIONS:
             return s
         elif s == "":
             return "exit"
         print("\nPlease input one of the given options")
+
+
+def get_date(prompt: str = "") -> date:
+    while True:
+        s = input(prompt)
+        try:
+            if not s.strip():
+                raise ValueError
+            if not all(c.isnumeric() or c == "-" for c in s):
+                raise ValueError
+            year, month, day = s.split("-")
+            year, month, day = int(year), int(month), int(day)
+            return date(year, month, day)
+        except ValueError:
+            print("Please input a valid date in YYYY-MM-DD format")
 
 
 def get_str(prompt: str = "") -> str:
@@ -160,7 +183,7 @@ def view_screen() -> None:
                 print("Please select a valid id")
                 continue
         except ValueError:
-            print("Please select a valid id")
+            print("Please select a valid id 2")
             continue
 
 
@@ -173,7 +196,9 @@ def inspect(id_: int, assets: list[Asset]) -> None:
             print('\nType "remove" to delete, "edit" to edit or press Enter to return')
             response = input(">").strip().lower()
             if response == "remove":
-                storage.remove_asset(id_)
+                yn = input("Are you sure? y/n: ").strip().lower()
+                if yn in ("y", "yes"):
+                    storage.remove_asset(id_)
                 return
             if response == "":
                 return
@@ -200,6 +225,9 @@ def edit_asset(id_: int) -> None:
             c_val = get_int("New object useful life: ")
         elif c_attr == "method":
             c_val = get_method("New depreciation method: ")
+        elif c_attr == "date":
+            c_attr = "date_"
+            c_val = get_date("New put in service date (YYYY-M-DD): ")
         elif c_attr == "":
             return
         else:
@@ -225,14 +253,12 @@ def main():
                 print()
             case "view":
                 view_screen()
-            # case "compare":
-            #     pass
             case "remove all":
                 response = input("Are you sure? ").strip().lower()
                 if response == "y" or response == "yes":
                     storage.remove_all()
             case "exit":
-                return 0
+                return
 
 
 if __name__ == "__main__":

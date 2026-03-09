@@ -5,12 +5,13 @@ Handles reading and writing asset data to the csv file
 
 import csv
 from pathlib import Path
+from datetime import date
 
 from models import Asset
 
 FILE = Path("storage/assets.csv")
 
-FIELDNAMES = ["id_", "name", "cost", "salvage", "life_years", "method"]
+FIELDNAMES = Asset.FIELDS
 
 
 def store_asset(asset: Asset) -> None:
@@ -54,10 +55,11 @@ def asset_from_row(row: dict[str, str]) -> Asset:
         salvage=float(row["salvage"]),
         life_years=int(row["life_years"]),
         method=row["method"],
+        date_=date.fromisoformat(row["date_"]),
     )
 
 
-def get_next_id() -> int | None:
+def get_next_id() -> int :
     if not FILE.exists():
         return 1
     with FILE.open("r", newline="", encoding="utf-8") as f:
@@ -66,7 +68,6 @@ def get_next_id() -> int | None:
         for row in reader:
             max_id_ = max(int(row["id_"]), max_id_)
         return max_id_ + 1
-    return None
 
 
 def get_id_s() -> list[int]:
@@ -88,6 +89,7 @@ def remove_asset(id_: int) -> bool:
         writer.writeheader()
         for row in rows:
             writer.writerow(row)
+    return True
 
 
 def remove_all() -> None:
