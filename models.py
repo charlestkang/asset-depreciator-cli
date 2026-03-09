@@ -69,3 +69,4 @@ class Asset:
             "method": self.method,
             "date_": self.date_,
         }
+

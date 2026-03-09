@@ -22,17 +22,16 @@ def store_asset(asset: Asset) -> None:
         writer.writerow(asset.to_dict())
 
 
-def get_asset(id_: int) -> Asset | None:
+def get_asset(id_: int) -> Asset:
     """Return the asset with given id, or None if not found."""
     if not FILE.exists():
-        return None
+        raise ValueError("No assets found")
     with FILE.open("r", newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             if int(row["id_"]) == id_:
                 return asset_from_row(row)
-    return None
-
+    raise ValueError(f"No asset found with id {id_}")   
 
 # returns None if no assets
 def get_all_assets() -> list[Asset]:

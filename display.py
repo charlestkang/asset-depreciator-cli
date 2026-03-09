@@ -73,7 +73,7 @@ def print_view_header() -> None:
 
 def print_depreciation_header(asset: Asset, progress: float) -> None:
     print(f"\nID: {asset.id_}, Name: {asset.name} ")
-
+    
     bar = int(progress * PROGRESS_BAR_LENGTH)
     percent = f"{progress * 100:.2f}%"
     print()
