@@ -4,7 +4,6 @@ Handles all input/output for the app
 """
 
 from models import Asset
-import calculator
 
 ID_WIDTH = 5
 NAME_WIDTH = 20
@@ -72,10 +71,9 @@ def print_view_header() -> None:
     )
 
 
-def print_depreciation_header(asset: Asset) -> None:
+def print_depreciation_header(asset: Asset, progress: float) -> None:
     print(f"\nID: {asset.id_}, Name: {asset.name} ")
 
-    progress = (calculator.percent_depreciated(asset))
     bar = int(progress * PROGRESS_BAR_LENGTH)
     percent = f"{progress * 100:.2f}%"
     print()
@@ -95,8 +93,8 @@ def print_depreciation_header(asset: Asset) -> None:
     )
 
 
-def inspect(asset: Asset, schedule: list[tuple[int, float, float]]) -> None:
-    print_depreciation_header(asset)
+def inspect(asset: Asset, schedule: list[tuple[int, float, float]], progress: float) -> None:
+    print_depreciation_header(asset, progress)
     total_accum = schedule[-1][2]
     for year, depreciation, accumulated in schedule:
         chart_mult = int(CHART_WIDTH * (accumulated / total_accum))

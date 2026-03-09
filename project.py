@@ -59,6 +59,8 @@ def normalize_method(method) -> str:
         return "ddb"
     elif method in ("sum of years digits", "syd"):
         return "syd"
+    else:
+        raise ValueError("Invalid method")
 
 
 def get_intention() -> str:
@@ -192,7 +194,7 @@ def inspect(id_: int, assets: list[Asset]) -> None:
     if asset:
         while True:
             asset = storage.get_asset(id_)
-            display.inspect(asset, calculator.depreciation_schedule(asset))
+            display.inspect(asset, calculator.depreciation_schedule(asset), calculator.percent_depreciated(asset))
             print('\nType "remove" to delete, "edit" to edit or press Enter to return')
             response = input(">").strip().lower()
             if response == "remove":

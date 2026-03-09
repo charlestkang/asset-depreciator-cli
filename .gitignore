@@ -11,3 +11,5 @@ venv/
 .DS_Store
 
 storage/assets.csv
+
+merged_for_gpt.md
