@@ -5,7 +5,7 @@ Does all depreciation schedule calculations
 
 from datetime import date
 
-from models import Asset
+from models import Asset, Metrics
 
 METHODS = [
     "straight line",
@@ -15,28 +15,6 @@ METHODS = [
     "ddb",
     "syd",
 ]
-
-
-class Metrics:
-    def __init__(
-        self,
-        schedule: list[tuple[int, float, float]],
-        total_depr: float,
-        percent_time: float,
-        percent_depr: float,
-        progress: float,
-        yearly_depr: float,
-        daily_depr: float,
-        elapsed_depr: float,
-    ):
-        self.schedule = schedule
-        self.total_depr = total_depr
-        self.percent_time = percent_time
-        self.percent_depr = percent_depr
-        self.progress = progress
-        self.yearly_depr = yearly_depr
-        self.daily_depr = daily_depr
-        self.elapsed_depr = elapsed_depr
 
 
 # All data comes from storage/assets.csv which is normalized data, clean water to drink
@@ -150,13 +128,11 @@ def build_metrics(asset: Asset) -> Metrics:
     # Determine current year index (0-based) for schedule lookup
     if elapsed_days < 0:
         # Asset not yet in service (future date)
-        year_idx = 0
         elapsed_depr = 0.0
         yearly_depr = 0.0
         percent_time_val = 0.0
     elif elapsed_years >= asset.life_years:
         # Asset has completed its useful life
-        year_idx = asset.life_years - 1
         elapsed_depr = total_depr
         yearly_depr = 0.0  # No more depreciation after useful life
         percent_time_val = 1.0
@@ -164,8 +140,23 @@ def build_metrics(asset: Asset) -> Metrics:
         # Asset is currently in service
         year_idx = int(elapsed_years)
         year_idx = max(0, min(year_idx, asset.life_years - 1))
-        elapsed_depr = schedule[year_idx][2]
-        yearly_depr = schedule[year_idx][1]
+        
+        # Calculate fraction of current service year elapsed
+        fraction_of_current_year = elapsed_years - year_idx  # [0.0, 1.0)
+        
+        # Accumulated through previous completed years
+        if year_idx == 0:
+            prev_accumulated = 0.0
+        else:
+            prev_accumulated = schedule[year_idx - 1][2]
+        
+        # Current year's scheduled depreciation
+        current_year_depr = schedule[year_idx][1]
+        
+        # Partial-year elapsed depreciation
+        elapsed_depr = prev_accumulated + (current_year_depr * fraction_of_current_year)
+        
+        yearly_depr = current_year_depr
         percent_time_val = min(elapsed_years / asset.life_years, 1.0)
     
     # Calculate derived metrics
@@ -173,11 +164,11 @@ def build_metrics(asset: Asset) -> Metrics:
     daily_depr = yearly_depr / 365.25
     
     return Metrics(
+        asset=asset,
         schedule=schedule,
         total_depr=total_depr,
         percent_time=percent_time_val,
         percent_depr=percent_depr,
-        progress=percent_depr,
         yearly_depr=yearly_depr,
         daily_depr=daily_depr,
         elapsed_depr=elapsed_depr,

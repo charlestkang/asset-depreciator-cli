@@ -3,7 +3,7 @@ Display module for depreciator app
 Handles all input/output for the app
 """
 
-from models import Asset
+from models import Asset, Metrics
 
 ID_WIDTH = 5
 NAME_WIDTH = 20
@@ -71,14 +71,30 @@ def print_view_header() -> None:
     )
 
 
-def print_depreciation_header(asset: Asset, progress: float) -> None:
-    print(f"\nID: {asset.id_}, Name: {asset.name} ")
+def inspect(metrics: Metrics) -> None:
+    """Display detailed depreciation information for an asset."""
+    asset = metrics.asset
     
-    bar = int(progress * PROGRESS_BAR_LENGTH)
-    percent = f"{progress * 100:.2f}%"
+    # Section 1: Asset details
+    print(f"\nID: {asset.id_}, Name: {asset.name}")
+    print(f"Cost: ${asset.cost:,.2f}, Salvage: ${asset.salvage:,.2f}, Life: {asset.life_years} years")
+    print(f"Method: {asset.method.upper()}, In service: {asset.date_}")
+    
+    # Section 2: Live depreciation metrics
+    print(f"\n--- Current Depreciation Status ---")
+    print(f"Total depreciation: ${metrics.total_depr:,.2f}")
+    print(f"Elapsed depreciation: ${metrics.elapsed_depr:,.2f}")
+    print(f"Yearly depreciation: ${metrics.yearly_depr:,.2f}")
+    print(f"Daily depreciation: ${metrics.daily_depr:,.2f}")
+    
+    # Progress bar
+    bar = int(metrics.percent_depr * PROGRESS_BAR_LENGTH)
+    percent = f"{metrics.percent_depr * 100:.2f}%"
     print()
     print("Progress: ", "█" * bar, "░" * (PROGRESS_BAR_LENGTH - bar), " ", percent, sep="")
-    print()
+    
+    # Section 3: Annual depreciation schedule
+    print(f"\n--- Annual Depreciation Schedule ---")
     print(
         f"{'YEAR':<{YEAR_WIDTH}} "
         f"{'Depreciation':>{DEPRECIATION_WIDTH}} "
@@ -91,12 +107,9 @@ def print_depreciation_header(asset: Asset, progress: float) -> None:
         f"{'-'*ACCUMULATED_WIDTH} "
         f"{'-'*CHART_WIDTH}"
     )
-
-
-def inspect(asset: Asset, schedule: list[tuple[int, float, float]], progress: float) -> None:
-    print_depreciation_header(asset, progress)
-    total_accum = schedule[-1][2]
-    for year, depreciation, accumulated in schedule:
+    
+    total_accum = metrics.schedule[-1][2]
+    for year, depreciation, accumulated in metrics.schedule:
         chart_mult = int(CHART_WIDTH * (accumulated / total_accum))
         print(
             f"{year:<{YEAR_WIDTH}}|{depreciation:>{DEPRECIATION_WIDTH}.2f}|{accumulated:>{ACCUMULATED_WIDTH}.2F}|{'█'*chart_mult}"

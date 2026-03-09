@@ -70,3 +70,24 @@ class Asset:
             "date_": self.date_,
         }
 
+
+class Metrics:
+    def __init__(
+        self,
+        asset: Asset,
+        schedule: list[tuple[int, float, float]],
+        total_depr: float,
+        percent_time: float,
+        percent_depr: float,
+        yearly_depr: float,
+        daily_depr: float,
+        elapsed_depr: float,
+    ):
+        self.asset = asset
+        self.schedule = schedule
+        self.total_depr = total_depr
+        self.percent_time = percent_time
+        self.percent_depr = percent_depr
+        self.yearly_depr = yearly_depr
+        self.daily_depr = daily_depr
+        self.elapsed_depr = elapsed_depr

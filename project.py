@@ -194,7 +194,13 @@ def inspect(id_: int, assets: list[Asset]) -> None:
     if asset:
         while True:
             asset = storage.get_asset(id_)
-            display.inspect(asset, calculator.depreciation_schedule(asset), calculator.percent_depreciated(asset))
+            if not asset:
+                print("\nAsset not found")
+                return
+            
+            metrics = calculator.build_metrics(asset)
+            display.inspect(metrics)
+            
             print('\nType "remove" to delete, "edit" to edit or press Enter to return')
             response = input(">").strip().lower()
             if response == "remove":
@@ -237,6 +243,9 @@ def edit_asset(id_: int) -> None:
             continue
 
         old_asset = storage.get_asset(id_)
+        if not old_asset:
+            print("\nAsset not found")
+            return
         data = old_asset.to_dict()
         data[c_attr] = c_val
         new_asset = Asset(**data)
