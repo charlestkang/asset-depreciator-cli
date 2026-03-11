@@ -5,7 +5,7 @@ Does all depreciation schedule calculations
 
 from datetime import date
 
-from models import Asset, Metrics
+from .models import Asset, Metrics
 
 METHODS = [
     "straight line",

@@ -3,7 +3,7 @@ Display module for depreciator app
 Handles all input/output for the app
 """
 
-from models import Asset, Metrics
+from .models import Asset, Metrics
 
 ID_WIDTH = 5
 NAME_WIDTH = 20
@@ -69,6 +69,14 @@ def print_view_header() -> None:
         f"{'-'*METHOD_WIDTH} "
         f"{'-'*DATE_WIDTH} "
     )
+
+
+def display_view_totals(daily_total: float, monthly_total: float, yearly_total: float) -> None:
+    """Display aggregate depreciation rates for the current asset list."""
+    print("\nPortfolio depreciation totals:")
+    print(f"Per day:   ${daily_total:,.2f}")
+    print(f"Per month: ${monthly_total:,.2f}")
+    print(f"Per year:  ${yearly_total:,.2f}")
 
 
 def inspect(metrics: Metrics) -> None:

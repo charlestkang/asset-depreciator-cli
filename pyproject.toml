@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "asset-depreciator-cli"
+version = "0.1.0"
+description = "CLI tool for tracking assets and calculating depreciation"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Paul" }]
+dependencies = []
+
+[project.scripts]
+asset-depreciator = "asset_depreciator.project:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
